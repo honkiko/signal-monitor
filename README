@@ -1,0 +1,44 @@
+进程莫名其妙退出了，没有任何日志线索，没有coredump，如何找到元凶？
+
+signal-monitor是一个可动态加载的内核模块，你只需要加载它，让通过proc文件sigmonitor_pid和sigmonitor_mask告诉它，你要监控的进程pid和信号集合，凡是满足条件的信号事件，都会记录到dmesg日志里。
+
+TEG数据平台部已经通过它成功定位了一起常驻进程异常退出事件 
+
+“致命”的信号可能是发给进程的某个线程的。trace event "sched_signal_send"是不行的
+
+*******
+Usage:
+*******
+
+Steps Overview
+==============
+
+1. Edit Makefile to make "KDIR" point to the kernel building dir
+2. make
+3. copy *.ko to target machine
+4. insmod sig_monitor_base.ko; insmod sig_monitor.ko
+5. echo xxx > /sys/kernel/debug/sigmonitor_pid
+6. (optional) echo 0x???????? > /sys/kernel/debug/sigmonitor_mask
+
+Interfaces
+===========
+
+Two virtual file is exported via debugfs:
+- sigmonitor_pid
+- sigmonitor_mask
+
+Make sure debugfs is mounted(usually at /sys/kernel/debug). If not, please mount it mannually:
+	mount -t debugfs debugfs /sys/kernel/debug
+
+sigmonitor_pid is a 32-bits integer presenting the pid of which process you are interesting.
+
+sigmonitor_mask is a 32-bits interger presenting the set of signals in interesting. The first bit presents signal 1(SIGHUP), 2nd bit presents signal 2(SIGINT), ...etc. You may run "kill -l" to see the signal number and name mapping.
+
+Output
+=======
+
+The matching signal events are logged in kernel ring buffer. Check it by "dmesg" or "cat /var/log/messages".
+The pid, command line and the process tree of the involved process, the signal number are recorded.
+
+
+

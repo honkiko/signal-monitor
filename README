@@ -23,7 +23,7 @@ Steps Overview
 Interfaces
 ===========
 
-Two virtual file is exported via debugfs:
+Two virtual files are exported via debugfs:
 - sigmonitor_pid
 - sigmonitor_mask
 

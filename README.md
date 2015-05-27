@@ -16,12 +16,13 @@ kernel TraceEvent is more flexible. 3 events are related to signals:
 - sched:sched_signal_send
 - syscalls:sys_enter_kill
 - syscalls:sys_exit_kill
+
 You can do
 ```
 echo "(sig == 15 || sig == 9) && pid == 100" > /sys/kernel/debug/tracing/events/sched/sched_signal_send/filter
 echo 1 > /sys/kernel/debug/tracing/events/sched/sched_signal_send/enable
 ```
-This looks good but usually the victim process is composed of many threads, and it's threads are terminating/creating. It doesn't work to add pids of all it's threads to the filter, because some of the threads will be destroyed and some threads with new pid will be created later.
+This looks good but usually the victim process is composed of many threads, and it's threads are terminating/creating. It doesn't work to add pids of all it's current threads to the filter, because some of the threads will be destroyed and some threads with new pid will be created later.
 
 ### signal-monitor
 
@@ -44,17 +45,17 @@ Two virtual files are exported via debugfs:
 - sigmonitor_pid
 - sigmonitor_mask
 
-Make sure debugfs is mounted(usually at /sys/kernel/debug). If not, please mount it mannually:
+Make sure debugfs is mounted(usually at /sys/kernel/debug). If not, please mount it manually:
 	mount -t debugfs debugfs /sys/kernel/debug
 
 sigmonitor_pid is a 32-bits integer presenting the pid of which process you are interesting.
 
-sigmonitor_mask is a 32-bits interger presenting the set of signals in interesting. The first bit presents signal 1(SIGHUP), 2nd bit presents signal 2(SIGINT), ...etc. You may run "kill -l" to see the signal number and name mapping.
+sigmonitor_mask is a 32-bits integer presenting the set of signals in interesting. The first bit presents signal 1(SIGHUP), 2nd bit presents signal 2(SIGINT), ...etc. You may run "kill -l" to see the signal number and name mapping.
 
 ### Output
 
 The matching signal events are logged in kernel ring buffer. Check it by "dmesg" or "cat /var/log/messages".
-Infomation that is recorded:
+Information that is recorded:
 - signal number
 - pid, command line, and process tree of destination process/thread
 - pid, command line, and process tree of source process/thread (if this signal is sent by a user process)

@@ -37,7 +37,7 @@ extern pid_t sigmonitor_pid;
 
 char *get_cmdline_for_current(void);
 
-char *get_cmdline(struct task_struct *task, bool is_atomic);
+int get_cmdline(struct task_struct *task, char *buffer, int buflen);
 
 void describe_task(struct task_struct *t, bool is_atomic);
 
@@ -58,5 +58,11 @@ bool is_dest_task_intresting(struct task_struct *dst);
 bool is_siginfo_from_kernel(struct siginfo *info);
 
 void reset_sigmonitor_pid(void);
+
+static inline int is_si_special(const struct siginfo *info)
+{
+	return info <= SEND_SIG_FORCED;
+}
+
 
 #define _put_task_struct(tsk) do { atomic_dec_and_test(&(tsk)->usage); } while(0)

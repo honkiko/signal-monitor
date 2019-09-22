@@ -36,7 +36,7 @@ jprobe_sys_kill(pid_t pid, int sig)
 
 	printk(KERN_INFO"===========sys_kill==========\n"
 			"user:%d process:%d[%s] send SIG %d to %d[%s]\n",
-			current_uid(), from->pid, from->comm, sig, to->pid, to->comm);
+			(int)from_kuid(&init_user_ns, current_uid()), from->pid, from->comm, sig, to->pid, to->comm);
 	dump_task_tree(from);
 	dump_task_tree(to);
 	_put_task_struct(to);
